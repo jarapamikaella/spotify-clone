@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import {
   HomeIcon,
-  LibraryIcon,
   SearchIcon,
-  PlusCircleIcon,
   HeartIcon,
   BookmarkIcon
 } from '@heroicons/react/outline'
+import {
+  FiPlus
+} from 'react-icons/fi'
+import {
+  BiLibrary
+} from 'react-icons/bi'
 import { usePlaylist, useSpotify } from '../hooks'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -24,7 +28,7 @@ export const Sidebar = () => {
   }, [router])
 
   return (
-    <div className='h-full w-[269px] hidden sm:block bg-primary text-white'>
+    <div className='h-full w-[242px] hidden sm:block bg-primary text-white'>
       <div className='flex flex-col py-6 space-y-8 text-sm px-6'>
         <div className='flex space-x-2 items-center'>
           <Image src="/spotify.png" alt="me" width="40" height="40" />
@@ -40,13 +44,13 @@ export const Sidebar = () => {
             <p>Search</p>
           </div>
           <div className='flex items-end space-x-4 cursor-pointer text-gray-300 hover:text-white'>
-            <LibraryIcon className='w-6 h-6' />
+            <BiLibrary className='w-6 h-6' />
             <p>Library</p>
           </div>
         </div>
         <div className='flex flex-col space-y-4'>
           <div className='flex space-x-4 cursor-pointer text-gray-300 hover:text-white'>
-            <PlusCircleIcon className='w-6 h-6' />
+            <FiPlus className='w-7 h-7 bg-gray-500 outline-none rounded-sm p-1' />
             <p>Create Playlist</p>
           </div>
           <div className='flex space-x-4 cursor-pointer text-gray-300 hover:text-white'>

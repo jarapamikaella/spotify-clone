@@ -11,12 +11,20 @@ import {
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useTracks } from '../hooks/useTracks'
+import Card from './Card'
+import { useAlbums, usePlaylist } from '../hooks'
+import { getUniqueItems } from '../libs/arrayParser'
+import { debounce } from 'lodash'
+import { COLORS } from '../libs/data/data'
 
 const Mainview = () => {
   const { data: session, status }: any = useSession()
   const router = useRouter()
-  const [tracks] = useTracks()
+  const [topTracks, recentlyPlayedTracks, newReleases] = useTracks()
+  const [_, featuredPlaylist] = usePlaylist()
+  const [savedAlbums] = useAlbums()
   const [showProfileMenu, setShowProfile] = useState(false)
+  const [colorScheme, setColorScheme] = useState(COLORS[0]);
 
   useEffect(() => {
     if (!session?.user && status !== 'loading' && status !== 'authenticated') {
@@ -24,47 +32,115 @@ const Mainview = () => {
     }
   }, [session])
 
+  const changeColor = debounce(() => {
+    setColorScheme(getNewColor());
+  }, 10)
+
+  const getNewColor = () => {
+    let newColor: any;
+    do {
+      newColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+    } while (newColor === colorScheme);
+
+    return newColor;
+  };
+
   return (
-    <div className='w-full h-screen bg-secondary text-white overflow-hidden'>
-      <div className='bg-gradient-to-b from-gray-900 px-8 pt-4 pb-6'>
-        <div className='w-full flex justify-between'>
-          <div className='flex space-x-4'>
+    <>
+      <nav className={`fixed top-0 w-[calc(100vw-242px)] bg-transparent`}>
+        <div className='flex w-full justify-between py-4 px-8'>
+          <div className='flex w-auto space-x-4'>
             <div className='bg-black/40 rounded-full p-1 items-center'>
-              <ChevronLeftIcon className='w-6 h-6' />
+              <ChevronLeftIcon className='w-6 h-6 cursor-pointer' />
             </div>
             <div className='bg-black/40 rounded-full p-1 items-center'>
-              <ChevronRightIcon className='w-6 h-6' />
+              <ChevronRightIcon className='w-6 h-6 cursor-pointer' />
             </div>
           </div>
-          <div className='relative flex items-center gap-3 bg-gray-700/30 rounded-full cursor-pointer hover:bg-gray-600' onClick={() => {
+          <div className='relative flex w-auto items-center gap-3 bg-black rounded-full cursor-pointer hover:bg-neutral-900' onClick={() => {
             setShowProfile(!showProfileMenu)
           }}>
             <img src={session?.user?.image} width={"24"} height={"24"} className='rounded-full ml-1'></img>
             <p className='text-sm'>{session?.user?.name}</p>
             <ChevronDownIcon className='w-6 h-6 mr-2' />
-            {showProfileMenu && <div className='absolute w-full bg-black top-10 py-5 rounded-md flex flex-col px-4 gap-3 text-sm'>
-              <p>Account</p>
-              <p>Profile</p>
-              <p>Settings</p>
-              <div className='border-t-[1px] w-full'></div>
-              <p onClick={() => signOut()}>Logout</p>
+            {showProfileMenu && <div className='absolute w-full bg-black top-10 rounded-md flex flex-col text-sm'>
+              <p className='hover:bg-neutral-900 px-4 py-2'>Account</p>
+              <p className='hover:bg-neutral-900 px-4 py-2'>Profile</p>
+              <p className='hover:bg-neutral-900 px-4 py-2'>Settings</p>
+              <div className='border-t-[1px] w-full hover:bg-neutral-900'></div>
+              <p className='hover:bg-neutral-900 px-4 py-2' onClick={() => signOut()}>Logout</p>
             </div>}
           </div>
         </div>
-        <div className='pt-8 pb-4'>
-          <p className='text-3xl pb-6 font-semibold'>Good evening</p>
-          <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-3'>
-            <Banner />
-            <Banner />
-            <Banner />
-            <Banner />
-            <Banner />
-            <Banner />
+      </nav>
+      {(recentlyPlayedTracks?.length && topTracks?.length) ? <div className={`w-full h-screen text-white overflow-auto pb-16`}>
+        <div className={`bg-gradient-to-b ${colorScheme.color} animate-text pt-4 px-8 transition-colors`}>
+          <div className='pt-16 pb-4'>
+            <p className='text-3xl pt-4 pb-6 font-semibold'>Good evening</p>
+            <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-3'>
+              {getUniqueItems(topTracks)?.length &&
+                <>
+                  {getUniqueItems(topTracks).slice(0, 6).map((item: any) => {
+                    return <Banner onHover={() => changeColor()} key={item.id} onLeaveHover={() => setColorScheme(COLORS[0])} imageUrl={item?.images[0]?.url} id={''} name={item?.name} />
+                  })}
+                </>
+              }
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+        <div className='px-8 pb-6'>
+          <div className='pt-8 pb-4'>
+            <p className='text-2xl pb-5 font-semibold'>Recently Played</p>
+            <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-8'>
+              {getUniqueItems(recentlyPlayedTracks)?.length &&
+                <>
+                  {getUniqueItems(recentlyPlayedTracks).slice(-8).map((item: any) => {
+                    return <Card key={item} imageUrl={item?.images[0]?.url} id={''} name={item?.name} artist={item?.artists?.length ? item?.artists[0]?.name : ''} />
+                  })}
+                </>
+              }
+            </div>
+          </div>
+          <div className='pt-8 pb-4'>
+            <p className='text-2xl pb-6 font-semibold'>Viral and Trending in the Philippines</p>
+            <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-8'>
+              {featuredPlaylist?.length &&
+                <>
+                  {featuredPlaylist.map((item: any) => {
+                    return <Card key={item} imageUrl={item?.images[0]?.url} id={''} name={item?.name} artist={item?.artists?.length ? item?.artists[0]?.name : ''} description={item.description} />
+                  })}
+                </>
+              }
+            </div>
+          </div>
+          <div className='pt-8 pb-4'>
+            <p className='text-2xl pb-6 font-semibold'>Recommended Radio</p>
+            <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-8'>
+              {newReleases?.length &&
+                <>
+                  {newReleases.map((item: any) => {
+                    return <Card key={item.id} imageUrl={item?.images[0]?.url} id={''} name={item?.name} artist={item?.artists?.length ? item?.artists[0]?.name : ''} />
+                  })}
+                </>
+              }
+            </div>
+          </div>
+          <div className='pt-8 pb-4'>
+            <p className='text-2xl pb-6 font-semibold'>Editor's pick</p>
+            <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-8'>
+              {savedAlbums?.length &&
+                <>
+                  {savedAlbums.map((item: any) => {
+                    return <Card key={item.id} imageUrl={item?.images[0]?.url} id={''} name={item?.name} artist={item?.artists?.length ? item?.artists[0]?.name : ''} />
+                  })}
+                </>
+              }
+            </div>
+          </div>
+        </div>
+      </div> : <></>}
+    </>
   )
 }
 
-export default Mainview
+export default Mainview;

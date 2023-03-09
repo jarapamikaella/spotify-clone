@@ -2,14 +2,28 @@ import React from 'react'
 import Image from 'next/image'
 import { FaPlay } from "react-icons/fa";
 
-export const Banner = () => {
+interface BannerProps {
+  imageUrl: string,
+  id: string,
+  name: string,
+  onHover?: () => void,
+  onLeaveHover?: () => void;
+}
+
+export const Banner = ({
+  imageUrl,
+  id,
+  name,
+  onHover = () =>  null,
+  onLeaveHover = () => null
+}: BannerProps) => {
 
   const imageLoader = () => {
-    return `https://i.scdn.co/image/ab67616d00001e0270dbc9f47669d120ad874ec1`
+    return imageUrl
   }
 
   return (
-    <div className='group w-full flex justify-between items-center bg-gray-500/30 pr-4 cursor-pointer hover:bg-gray-500/40 rounded-md'>
+    <div onMouseEnter={onHover} onMouseLeave={onLeaveHover} className='group w-full flex justify-between items-center bg-bannerBackground pr-4 cursor-pointer hover:bg-gray-500/40 rounded-md'>
       <div className='flex items-center space-x-4'>
         <Image
           loader={imageLoader}
@@ -17,11 +31,12 @@ export const Banner = () => {
           alt="Album"
           width={80}
           height={80}
+          className='rounded-l-md shadow-sm shadow-black'
         />
-        <p>SOS</p>
+        <p>{name}</p>
       </div>
-      <div className='accent-black bg-black invisible group-hover:visible group-hover:bg-green-400 group-hover:p-3 group-hover:rounded-full group-hover:shadow-md group-hover:shadow-gray-900'>
-        <FaPlay className='h-5 w-5 text-black'/>
+      <div className='accent-black bg-black invisible group-hover:visible group-hover:bg-green-400 group-hover:p-4 group-hover:rounded-full group-hover:shadow-md group-hover:shadow-gray-900'>
+        <FaPlay className='w-4 h-4 text-black'/>
       </div>
     </div>
   )
