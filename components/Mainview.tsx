@@ -14,6 +14,8 @@ import { useTracks } from '../hooks/useTracks'
 import Card from './Card'
 import { useAlbums, usePlaylist } from '../hooks'
 import { getUniqueItems } from '../libs/arrayParser'
+import { debounce } from 'lodash'
+import { COLORS } from '../libs/data/data'
 
 const Mainview = () => {
   const { data: session, status }: any = useSession()
@@ -22,6 +24,7 @@ const Mainview = () => {
   const [_, featuredPlaylist] = usePlaylist()
   const [savedAlbums] = useAlbums()
   const [showProfileMenu, setShowProfile] = useState(false)
+  const [colorScheme, setColorScheme] = useState(COLORS[0]);
 
   useEffect(() => {
     if (!session?.user && status !== 'loading' && status !== 'authenticated') {
@@ -29,10 +32,23 @@ const Mainview = () => {
     }
   }, [session])
 
+  const changeColor = debounce(() => {
+    setColorScheme(getNewColor());
+  }, 10)
+
+  const getNewColor = () => {
+    let newColor: any;
+    do {
+      newColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+    } while (newColor === colorScheme);
+
+    return newColor;
+  };
+
   return (
     <>
       <nav className={`fixed top-0 w-[calc(100vw-242px)] bg-transparent`}>
-        <div className='flex w-full justify-between py-4 px-8 mb-8'>
+        <div className='flex w-full justify-between py-4 px-8'>
           <div className='flex w-auto space-x-4'>
             <div className='bg-black/40 rounded-full p-1 items-center'>
               <ChevronLeftIcon className='w-6 h-6 cursor-pointer' />
@@ -57,15 +73,15 @@ const Mainview = () => {
           </div>
         </div>
       </nav>
-     {(recentlyPlayedTracks?.length && topTracks?.length) ? <div className='w-full h-screen bg-secondary text-white overflow-auto pb-16'>
-        <div className='bg-gradient-to-b from-stone-900 pt-4 px-8'>
+      {(recentlyPlayedTracks?.length && topTracks?.length) ? <div className={`w-full h-screen text-white overflow-auto pb-16`}>
+        <div className={`bg-gradient-to-b ${colorScheme.color} animate-text pt-4 px-8 transition-colors`}>
           <div className='pt-16 pb-4'>
-            <p className='text-3xl pb-6 font-semibold'>Good evening</p>
+            <p className='text-3xl pt-4 pb-6 font-semibold'>Good evening</p>
             <div className='w-full grid gap-x-8 gap-y-4 grid-cols-2 md:grid-cols-2 xl:grid-cols-3'>
               {getUniqueItems(topTracks)?.length &&
                 <>
                   {getUniqueItems(topTracks).slice(0, 6).map((item: any) => {
-                    return <Banner key={item.id} imageUrl={item?.images[0]?.url} id={''} name={item?.name} />
+                    return <Banner onHover={() => changeColor()} key={item.id} onLeaveHover={() => setColorScheme(COLORS[0])} imageUrl={item?.images[0]?.url} id={''} name={item?.name} />
                   })}
                 </>
               }

@@ -6,12 +6,16 @@ interface BannerProps {
   imageUrl: string,
   id: string,
   name: string,
+  onHover?: () => void,
+  onLeaveHover?: () => void;
 }
 
 export const Banner = ({
   imageUrl,
   id,
-  name
+  name,
+  onHover = () =>  null,
+  onLeaveHover = () => null
 }: BannerProps) => {
 
   const imageLoader = () => {
@@ -19,7 +23,7 @@ export const Banner = ({
   }
 
   return (
-    <div className='group w-full flex justify-between items-center bg-bannerBackground pr-4 cursor-pointer hover:bg-gray-500/40 rounded-md'>
+    <div onMouseEnter={onHover} onMouseLeave={onLeaveHover} className='group w-full flex justify-between items-center bg-bannerBackground pr-4 cursor-pointer hover:bg-gray-500/40 rounded-md'>
       <div className='flex items-center space-x-4'>
         <Image
           loader={imageLoader}
