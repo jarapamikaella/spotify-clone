@@ -4,12 +4,17 @@ import { SessionProvider, getProviders } from 'next-auth/react'
 import Sidebar from '../components/Sidebar'
 import { useRouter } from 'next/router'
 import Player from '../components/Player'
+import Head from 'next/head'
 
 export const MyApp = ({ Component, pageProps: { session, ...pageProps } }: AppProps) => {
   const router = useRouter()
 
   return (
     <SessionProvider session={session}>
+       <Head>
+        <title>Spotify - Web Player</title>
+        <link rel="icon" href="/icon.ico" />
+      </Head>
       <div className='relative h-screen bg-black text-white'>
         <div className='flex h-screen'>
           <div className={`${router.pathname === '/login' && 'hidden'}`}>
