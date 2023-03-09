@@ -13,7 +13,10 @@ module.exports = {
         secondary: '#121212',
         white: '#FFFFFF',
         background: '#181818',
-        active: '#1db954'
+        active: '#1db954',
+        bannerBackground: '#353436',
+        light: '#7C7C7C',
+        lightBackground: '#151515'
       },
       fontSize: {
         'xs2': ['10px', { 'line-height': '12px'}],
